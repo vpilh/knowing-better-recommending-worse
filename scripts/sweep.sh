@@ -20,7 +20,8 @@ MODELS=(
   "mistral-small-24b|Intel/Mistral-Small-3.2-24B-Instruct-2506-int4-AutoRound|"
   "qwen3.8-27b|RedHatAI/Qwen3.8-27B-INT4|--max-num-seqs 128"
   "gemma4-31b|google/gemma-4-31B-it-qat-w4a16-ct|"
-  "olmo3.1-32b|cyankiwi/Olmo-3.1-32B-Instruct-AWQ-4bit|--chat-template $ROOT/templates/cyankiwi--Olmo-3.1-32B-Instruct-AWQ-4bit.jinja"
+  # olmo3.1-32b excluded by PREREG.md section 5 rule (ii): 74% missing neutral readouts on dev
+  # "olmo3.1-32b|cyankiwi/Olmo-3.1-32B-Instruct-AWQ-4bit|--chat-template $ROOT/templates/cyankiwi--Olmo-3.1-32B-Instruct-AWQ-4bit.jinja"
 )
 [ -n "$ONLY" ] && mapfile -t MODELS < <(printf '%s\n' "${MODELS[@]}" | grep -E "^($ONLY)\|")
 
