@@ -7,6 +7,7 @@ MODEL="$1"; shift
 cd ~/epistemics && source .venv/bin/activate
 export CUDA_HOME=/usr/local/cuda
 export PATH="$CUDA_HOME/bin:$PATH"
+export VLLM_ENGINE_READY_TIMEOUT_S=1800   # large 4-bit models need more than the default 600 s
 mkdir -p ~/epistemics/logs
 NAME=$(echo "$MODEL" | tr '/' '_')
 QARGS=()

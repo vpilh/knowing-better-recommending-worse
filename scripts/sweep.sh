@@ -20,7 +20,7 @@ MODELS=(
   "mistral-small-24b|Intel/Mistral-Small-3.2-24B-Instruct-2506-int4-AutoRound|"
   "qwen3.8-27b|RedHatAI/Qwen3.8-27B-INT4|"
   "gemma4-31b|google/gemma-4-31B-it-qat-w4a16-ct|"
-  "olmo3.1-32b|cyankiwi/Olmo-3.1-32B-Instruct-AWQ-4bit|"
+  "olmo3.1-32b|cyankiwi/Olmo-3.1-32B-Instruct-AWQ-4bit|--chat-template $ROOT/templates/cyankiwi--Olmo-3.1-32B-Instruct-AWQ-4bit.jinja"
 )
 [ -n "$ONLY" ] && MODELS=( $(printf '%s\n' "${MODELS[@]}" | grep -E "^($ONLY)\|") )
 
@@ -32,7 +32,7 @@ for entry in "${MODELS[@]}"; do
   # shellcheck disable=SC2086
   setsid bash scripts/serve.sh "$ckpt" $extra &
   ready=0
-  for i in $(seq 1 180); do
+  for i in $(seq 1 380); do   # up to ~32 min, matching VLLM_ENGINE_READY_TIMEOUT_S
     sleep 5
     if grep -q "Application startup complete" ~/epistemics/logs/vllm_${name}.log 2>/dev/null; then ready=1; break; fi
     if grep -qE "RuntimeError|Error:" ~/epistemics/logs/vllm_${name}.log 2>/dev/null; then break; fi

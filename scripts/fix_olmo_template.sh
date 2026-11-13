@@ -4,7 +4,7 @@
 set -e
 OUT=/mnt/c/Users/Valentin/AI_x_Epistemics/templates
 mkdir -p "$OUT"
-for repo in allenai--Olmo-3-7B-Instruct; do
+for repo in allenai--Olmo-3-7B-Instruct cyankiwi--Olmo-3.1-32B-Instruct-AWQ-4bit; do
   d=$(ls -d ~/.cache/huggingface/hub/models--$repo/snapshots/* | head -1)
   sed -e 's/tools is not none/(tools is defined and tools is not none)/g' \
       -e 's/tools is none/(tools is not defined or tools is none)/g' \

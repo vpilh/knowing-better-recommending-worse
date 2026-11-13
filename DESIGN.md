@@ -54,6 +54,15 @@ Decided by Valentin after the pilot; they replace the matching parts of the sect
    |---|---|---|---|---|
    | Qwen3-4B-AWQ | 0.58-0.88 | +0.004 | +0.076 | +0.40 (0.86) |
    | Qwen3-8B-AWQ | 0.62-0.88 | +0.064 | +0.020 | +0.52 (1.04) |
+   | OLMo-3-7B (bf16) | 0.52 (F1), 0.89, 0.87 | +0.135 | +0.173 | +0.46 (0.89) |
+
+   OLMo exceeds the 1,500-token limit in 37% of turn-1 replies; the turn-2 readout still succeeds
+   in 99% of cases. Pressure sensitivity differs clearly by family (strong-pressure ratio to
+   information: 0.04-0.19 for Qwen, 0.38 for OLMo).
+4. **Quantization:** online 4-bit quantization in vLLM 0.33 does not work for dense models on the
+   5090 (MXFP4 linear is unsupported on SM 12.x; online NVFP4 covers MoE layers only; bitsandbytes
+   was removed). Main sweep uses 4-bit W4A16 checkpoints from the best available source (PREREG.md,
+   section 4); OLMo-3-7B runs in bf16.
 
    Accuracy barely rises with |δ|: errors are conceptual (e.g. some F1 traces value the extra
    repayment at "$5,000 at the end"), not imprecision near θ*. F1 stays in (not flat).
