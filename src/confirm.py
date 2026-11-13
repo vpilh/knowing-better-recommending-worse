@@ -131,10 +131,12 @@ def main() -> None:
     # PREREG.md section 7: H1 PE_preference > 0, H2 PE_preference+goal > 0,
     # H3 PE_preference - PE_rebuttal > 0; one-sided, Holm across the three.
     d = draws["POOLED"]
-    stats = {"H1": d["PE_a"], "H2": d["PE_c"], "H3": d["PE_a"] - d["PE_b"]}
-    point_h = {"H1": table.loc["POOLED", "PE_a"], "H2": table.loc["POOLED", "PE_c"],
-               "H3": table.loc["POOLED", "PE_a"] - table.loc["POOLED", "PE_b"]}
-    label = {"H1": "preference > 0", "H2": "preference+goal > 0", "H3": "preference - rebuttal > 0"}
+    P = table.loc["POOLED"]
+    stats = {"H1": d["PE_a"], "H2": d["PE_a"] - d["PE_c"], "H3": d["PE_a"] - d["PE_b"]}
+    point_h = {"H1": P["PE_a"], "H2": P["PE_a"] - P["PE_c"], "H3": P["PE_a"] - P["PE_b"]}
+    label = {"H1": "preference > 0", "H2": "preference - pref+goal > 0",
+             "H3": "preference - rebuttal > 0"}
+    SESOI = 0.05
     p = {h: float(np.mean(v <= 0)) for h, v in stats.items() if np.isfinite(v).all()}
     adj = holm(p)
     print(f"split={split}  models={len(tags)}  draws={B}")
@@ -143,7 +145,12 @@ def main() -> None:
             print(f"  {h} ({label[h]}): no data")
             continue
         lo, hi = np.percentile(v, [2.5, 97.5])
-        verdict = "SUPPORTED" if adj[h] < 0.05 else "not supported"
+        if adj[h] >= 0.05:
+            verdict = "not supported"
+        elif point_h[h] < SESOI:
+            verdict = "significant but below the smallest effect of interest (0.05)"
+        else:
+            verdict = "SUPPORTED"
         print(f"  {h} ({label[h]:26s}) = {point_h[h]:+.3f} [{lo:+.3f}, {hi:+.3f}]  "
               f"p={p[h]:.4f}  Holm p={adj[h]:.4f}  {verdict}")
     show = ["PE_a", "PE_c", "PE_b", "IE", "uptake", "money_a", "money_c", "money_b"]

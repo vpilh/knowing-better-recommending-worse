@@ -76,7 +76,9 @@ def read_ab_after_marker(content) -> dict:
     i = text.lower().rfind(MARKER)
     if i < 0:
         return {"pA": None, "mass": 0.0, "pos": None, "tok": None, "n_tokens": len(content)}
-    start = next(k for k, end in enumerate(ends) if end > i + len(MARKER))
+    start = next((k for k, end in enumerate(ends) if end > i + len(MARKER)), None)
+    if start is None:   # marker is the last thing generated: no letter follows
+        return {"pA": None, "mass": 0.0, "pos": None, "tok": None, "n_tokens": len(content)}
     r = read_ab(content[start:])
     if r["pos"] is not None:
         r["pos"] += start
