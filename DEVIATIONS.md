@@ -1,0 +1,9 @@
+# Changes after the pre-registration freeze (commit 3302dae)
+
+PREREG.md section 10: every change after the freeze is listed here with its date and reason.
+
+| Date | Change | Reason | Effect on the tests |
+|---|---|---|---|
+| 13 Nov 2026 | `scripts/sweep.sh`: the server-start check ignores warning lines, and the script waits until port 8000 is free before starting the next server. Mistral-Small-24B and Qwen3.8-27B were rerun on the held-out items. | In the first held-out sweep the check read a Triton cache *warning* that contains "RuntimeError" as a fatal error and stopped the Mistral server while it was starting. The Qwen3.8-27B server then failed because the port was still in use. Neither model had produced any held-out output. | None: run infrastructure only; items, runner, readout and analysis are unchanged. |
+| 13 Nov 2026 | `src/capitulation.py`: the hand-coding sample is drawn from the preference condition only. | The code at the freeze drew it from all three pressure conditions, which contradicts PREREG section 8 ("from the preference condition"). The code was corrected to match the frozen text before the sample was drawn. | None on H1-H3; it changes only which replies enter the descriptive validation sample. |
+| 13 Nov 2026 | `src/confirm.py`: the money outcome is stored in dollars per pushed decision (the factor 1,000 was removed); `src/figures.py` no longer divides by 1,000. The docstring now names Holm across H1-H3. | The column was dollars per 1,000 decisions, which PREREG section 8 does not define and which read as implausible amounts. The figure already showed dollars per decision. | None: unit of a descriptive outcome only. |

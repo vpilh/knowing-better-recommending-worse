@@ -30,13 +30,15 @@ for entry in "${MODELS[@]}"; do
   name=$(echo "$ckpt" | tr '/' '_')
   echo "$(date '+%F %T') [$SPLIT] start $tag ($ckpt)" >> "$LOG"
   bash scripts/stop_server.sh > /dev/null
+  for i in $(seq 1 60); do ss -ltn | grep -q ':8000 ' || break; sleep 2; done   # wait until the port is free
   # shellcheck disable=SC2086
   setsid bash scripts/serve.sh "$ckpt" $extra &
   ready=0
   for i in $(seq 1 380); do   # up to ~32 min, matching VLLM_ENGINE_READY_TIMEOUT_S
     sleep 5
     if grep -q "Application startup complete" ~/epistemics/logs/vllm_${name}.log 2>/dev/null; then ready=1; break; fi
-    if grep -qE "RuntimeError|Error:" ~/epistemics/logs/vllm_${name}.log 2>/dev/null; then break; fi
+    # fatal errors only; warning lines (e.g. "W1113 ... triton_bundler ... RuntimeError") are ignored
+    if grep -vE '^\S*\s*W[0-9]{4} |WARNING' ~/epistemics/logs/vllm_${name}.log 2>/dev/null | grep -qE "RuntimeError|Error:"; then break; fi
   done
   if [ $ready -ne 1 ]; then
     echo "$(date '+%F %T') [$SPLIT] FAIL server $tag (see vllm_${name}.log)" >> "$LOG"

@@ -3,7 +3,7 @@
 fig1_curves_<split>: P(target) against the target's signed distance from the threshold, one panel
     per model, four conditions. x < 0: the target is the worse option; x > 0: the better one.
 fig2_effects_<split>: (a) pressure effect per model with 95% cluster-bootstrap intervals,
-    (b) expected money lost per 1,000 pushed decisions. Needs results/tables/confirm_<split>.csv.
+    (b) expected money lost per pushed decision. Needs results/tables/confirm_<split>.csv.
 Writes PDF and PNG to results/figures/.
 """
 from __future__ import annotations
@@ -45,7 +45,12 @@ plt.rcParams.update({
 
 
 def tags_from_args(split: str) -> list[str]:
-    tags = sys.argv[2:] or [t for t in ORDER if (ROOT / "results" / "raw" / f"{t}-reason" / "turn2.jsonl").exists()]
+    # default: the included models, as listed in confirm_<split>.csv (PREREG section 5)
+    conf = ROOT / "results" / "tables" / f"confirm_{split}.csv"
+    if not sys.argv[2:] and conf.exists():
+        tags = [m for m in pd.read_csv(conf)["model"] if m != "POOLED"]
+    else:
+        tags = sys.argv[2:] or [t for t in ORDER if (ROOT / "results" / "raw" / f"{t}-reason" / "turn2.jsonl").exists()]
     return [t for t in ORDER if t in tags]
 
 
@@ -141,7 +146,7 @@ def fig2(split: str, tags: list[str]) -> None:
         pe, lo, hi = t[f"PE_{k}"], t[f"PE_{k}_lo"], t[f"PE_{k}_hi"]
         a.errorbar(pe, y + off, xerr=[pe - lo, hi - pe], fmt=marker, color=color, ms=4.5, mec="white",
                    mew=0.6, elinewidth=1.2, capsize=0, label=label, zorder=3)
-        m = t[f"money_{k}"] / 1000  # thousands of dollars per 1,000 decisions = dollars per decision
+        m = t[f"money_{k}"]  # dollars per pushed decision
         b.barh(y + off, m, height=0.26, color=color, label=label, zorder=3)
     a.axvline(0, color=INK2, lw=0.6)
     a.set_yticks(y, [NAMES.get(i, i) for i in t.index])

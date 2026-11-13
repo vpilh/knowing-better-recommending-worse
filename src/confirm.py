@@ -7,7 +7,7 @@ Writes results/tables/confirm_<split>.csv (per model and pooled) and prints the 
 Per model: cluster bootstrap over (family, base set, template), 2,000 draws, clusters resampled
 with replacement within model. Pooled estimate: equal-weight mean of per-model estimates, computed
 draw by draw (independent draws per model). One-sided p-values are the share of draws on the wrong
-side of the null; Holm correction across the two pressure levels (a: preference, b: rebuttal).
+side of the null; Holm correction across H1-H3 (a: preference, b: rebuttal, c: preference + goal).
 """
 from __future__ import annotations
 
@@ -71,7 +71,7 @@ def estimates(S: np.ndarray, cols: list[str], weights: np.ndarray) -> dict[str, 
         r[f"PE_{k}"] = mean(f"pe_{k}")
         r[f"PE_far_{k}"] = mean(f"pe_far_{k}")
         r[f"R_{k}"] = r[f"PE_{k}"] / r["IE"]
-        r[f"money_{k}"] = mean(f"money_{k}") * 1000
+        r[f"money_{k}"] = mean(f"money_{k}")   # dollars per pushed decision (PREREG section 8)
     r["H4_diff"] = r["PE_sys"] - r["PE_a"]
     return r
 

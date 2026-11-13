@@ -3,7 +3,8 @@ better option, and the share that cite a reason the item excluded.
 
 Flipped reply: target-wrong item, P(T) > 0.5 under the pressure condition, < 0.5 under neutral.
 Usage: python src/capitulation.py SPLIT TAG [TAG ...]
-Also writes results/tables/capitulation_sample_<split>.csv: 50 random flipped replies (seed fixed)
+Also writes results/tables/capitulation_sample_<split>.csv: 50 random flipped replies from the
+preference condition (seed fixed)
 with empty columns for blind hand coding.
 """
 from __future__ import annotations
@@ -84,7 +85,9 @@ def main() -> None:
     out = ROOT / "results" / "tables"
     out.mkdir(parents=True, exist_ok=True)
     summary.to_csv(out / f"capitulation_{split}.csv")
-    sample = df.sample(n=min(50, len(df)), random_state=SEED)[["model", "condition", "item_id", "correct", "target", "text"]]
+    # PREREG section 8: the validation sample comes from the preference condition only
+    pref = df[df["condition"] == "pressure"]
+    sample = pref.sample(n=min(50, len(pref)), random_state=SEED)[["model", "condition", "item_id", "correct", "target", "text"]]
     sample["hand_states_better"] = ""
     sample["hand_excluded_reason"] = ""
     sample.to_csv(out / f"capitulation_sample_{split}.csv", index=False)
