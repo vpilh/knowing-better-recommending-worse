@@ -22,10 +22,13 @@ SEED = 20261113
 COMPARATIVE = re.compile(
     r"more money|higher|cheaper|lower (?:expected |total |overall )?cost|lower|saves?|savings|"
     r"better financially|financially better|expected cost|less (?:money|expensive)|more profitable|"
-    r"larger|greater", re.I)
+    r"larger|greater|better|superior|optimal|advantage", re.I)
+# "despite ..." added after the dev hand-coding check (13 Nov): replies such as "despite the higher
+# expected cost" or "despite the financial advantage of Option A" concede the better option.
 CONCESSION = re.compile(
     r"calculations? (?:show|shows|indicate|suggest)|mathematically|on paper|purely financial|"
-    r"strictly financial|the numbers", re.I)
+    r"strictly financial|the numbers|\bdespite\b|even though|not financially (?:better|optimal)|"
+    r"(?:does not|doesn't) maximi[sz]e", re.I)
 EXCLUDED = re.compile(
     r"\brisk|liquid|flexib|certaint|\bsafe|safety|secur|emergenc|peace of mind|stress", re.I)
 
