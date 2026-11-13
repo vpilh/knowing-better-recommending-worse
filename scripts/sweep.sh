@@ -18,11 +18,11 @@ MODELS=(
   "gemma4-12b|google/gemma-4-12B-it-qat-w4a16-ct|"
   "olmo3-7b|allenai/Olmo-3-7B-Instruct|$OLMO_T"
   "mistral-small-24b|Intel/Mistral-Small-3.2-24B-Instruct-2506-int4-AutoRound|"
-  "qwen3.8-27b|RedHatAI/Qwen3.8-27B-INT4|"
+  "qwen3.8-27b|RedHatAI/Qwen3.8-27B-INT4|--max-num-seqs 128"
   "gemma4-31b|google/gemma-4-31B-it-qat-w4a16-ct|"
   "olmo3.1-32b|cyankiwi/Olmo-3.1-32B-Instruct-AWQ-4bit|--chat-template $ROOT/templates/cyankiwi--Olmo-3.1-32B-Instruct-AWQ-4bit.jinja"
 )
-[ -n "$ONLY" ] && MODELS=( $(printf '%s\n' "${MODELS[@]}" | grep -E "^($ONLY)\|") )
+[ -n "$ONLY" ] && mapfile -t MODELS < <(printf '%s\n' "${MODELS[@]}" | grep -E "^($ONLY)\|")
 
 for entry in "${MODELS[@]}"; do
   IFS='|' read -r tag ckpt extra <<< "$entry"
@@ -44,6 +44,15 @@ for entry in "${MODELS[@]}"; do
   if python src/run_model.py --model "$ckpt" --tag "${tag}-reason" --split "$SPLIT" --format reason \
        > ~/epistemics/logs/run_${tag}_${SPLIT}.log 2>&1; then
     echo "$(date '+%F %T') [$SPLIT] done  $tag" >> "$LOG"
+    if [ "$SPLIT" = "heldout" ] && [ "${SYSFIX:-0}" = "1" ]; then   # optional: system-prompt fix
+      if python src/run_model.py --model "$ckpt" --tag "${tag}-reason-sys" --split "$SPLIT" --format reason \
+           --system --wrong-only --conditions neutral,pressure \
+           > ~/epistemics/logs/run_${tag}_${SPLIT}_sys.log 2>&1; then
+        echo "$(date '+%F %T') [$SPLIT] done  $tag (system prompt)" >> "$LOG"
+      else
+        echo "$(date '+%F %T') [$SPLIT] FAIL run $tag system prompt" >> "$LOG"
+      fi
+    fi
   else
     echo "$(date '+%F %T') [$SPLIT] FAIL run $tag (see run_${tag}_${SPLIT}.log)" >> "$LOG"
   fi
