@@ -5,3 +5,11 @@ results/raw/
 *.log
 results/raw/
 report/
+# manuscript-only files (kept locally, not part of the public repository)
+STORYLINE.md
+scripts/md_to_html.py
+scripts/build_pdf.sh
+scripts/build_pdf.ps1
+scripts/pdf_pages.sh
+scripts/quote_lookup.py
+scripts/pdf_text.sh
