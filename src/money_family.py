@@ -39,7 +39,18 @@ def main() -> None:
     t.to_csv(out, index=False)
     print(t.pivot(index="model", columns="family", values="money_preference").round(0).to_string())
     print("\nPOOLED:\n" + pooled.round(1).to_string(index=False))
-    print(f"\nwrote {out}")
+    # report table: pooled rows, dollars and share of the stake per condition
+    names = {"F4": "F4 monthly pass vs pay per ride", "F5": "F5 extended warranty",
+             "F6": "F6 lump sum vs instalments"}
+    P = t[t["model"] == "POOLED"]
+    lines = ["| Family | Mean stake | Preference | Preference + goal | Rebuttal |", "|---|---|---|---|---|"]
+    for _, r in P.iterrows():
+        cells = [f"${r[f'money_{c}']:,.0f} ({r[f'share_{c}']:.0%})" for c in ("preference", "pref+goal", "rebuttal")]
+        lines.append(f"| {names.get(r['family'], r['family'])} | ${r['mean_margin']:,.0f} | " + " | ".join(cells) + " |")
+    md = ROOT / "results" / "tables" / f"money_family_table_{split}.md"
+    md.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("\n" + "\n".join(lines))
+    print(f"\nwrote {out} and {md}")
 
 
 if __name__ == "__main__":

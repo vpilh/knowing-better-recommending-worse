@@ -2,8 +2,9 @@
 
 fig1_curves_<split>: P(target) against the target's signed distance from the threshold, one panel
     per model, four conditions. x < 0: the target is the worse option; x > 0: the better one.
-fig2_effects_<split>: (a) pressure effect per model with 95% cluster-bootstrap intervals,
-    (b) expected money lost per pushed decision. Needs results/tables/confirm_<split>.csv.
+fig2_effects_<split>: pressure effect per model with 95% cluster-bootstrap intervals (preference,
+    rebuttal). Needs results/tables/confirm_<split>.csv. Money lost is reported by family in a table
+    (src/money_family.py), not in a figure.
 Writes PDF and PNG to results/figures/.
 """
 from __future__ import annotations
@@ -139,27 +140,21 @@ def fig2(split: str, tags: list[str]) -> None:
     tags = [x for x in tags if x in t.index]
     t = t.loc[tags].sort_values("PE_a")
     y = np.arange(len(t))
-    fig, (a, b) = plt.subplots(1, 2, figsize=(7.0, 0.32 * len(t) + 1.0), sharey=True,
-                               gridspec_kw={"width_ratios": [1.15, 1]})
+    # money is reported by family in a table (money_family_<split>.csv), not in this figure
+    fig, a = plt.subplots(figsize=(4.2, 0.32 * len(t) + 1.0))
     for k, cond, off in (("a", "pressure", 0.14), ("b", "pressure_strong", -0.14)):
         label, color, _, marker = COND[cond]
         pe, lo, hi = t[f"PE_{k}"], t[f"PE_{k}_lo"], t[f"PE_{k}_hi"]
         a.errorbar(pe, y + off, xerr=[pe - lo, hi - pe], fmt=marker, color=color, ms=4.5, mec="white",
                    mew=0.6, elinewidth=1.2, capsize=0, label=label, zorder=3)
-        m = t[f"money_{k}"]  # dollars per pushed decision
-        b.barh(y + off, m, height=0.26, color=color, label=label, zorder=3)
     a.axvline(0, color=INK2, lw=0.6)
     a.set_yticks(y, [NAMES.get(i, i) for i in t.index])
     a.set_xlabel("pressure effect on P(target), target wrong")
     a.set_xlim(-0.05, 1.0)
-    b.set_xlabel("expected loss per pushed decision ($)")
-    for ax in (a, b):
-        ax.grid(axis="x", color=GRID, lw=0.6, zorder=0)
-        ax.tick_params(length=2, width=0.5)
-        for side in ("top", "right"):
-            ax.spines[side].set_visible(False)
-    a.set_title("(a) Shift toward the user's option", fontsize=8, loc="left", color=INK)
-    b.set_title("(b) Money lost to pressure", fontsize=8, loc="left", color=INK)
+    a.grid(axis="x", color=GRID, lw=0.6, zorder=0)
+    a.tick_params(length=2, width=0.5)
+    for side in ("top", "right"):
+        a.spines[side].set_visible(False)
     a.legend(loc="lower right", fontsize=7.5)
     fig.tight_layout()
     save(fig, f"fig2_effects_{split}")
