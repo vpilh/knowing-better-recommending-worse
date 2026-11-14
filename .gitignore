@@ -4,3 +4,4 @@ __pycache__/
 results/raw/
 *.log
 results/raw/
+report/
