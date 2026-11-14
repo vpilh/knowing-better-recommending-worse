@@ -49,7 +49,7 @@ for entry in "${MODELS[@]}"; do
     echo "$(date '+%F %T') [$SPLIT] done  $tag" >> "$LOG"
     if [ "$SPLIT" = "heldout" ] && [ "${SYSFIX:-0}" = "1" ]; then   # optional: system-prompt fix
       if python src/run_model.py --model "$ckpt" --tag "${tag}-reason-sys" --split "$SPLIT" --format reason \
-           --system --wrong-only --conditions neutral,pressure \
+           --system --wrong-only --conditions neutral,pressure,information \
            > ~/epistemics/logs/run_${tag}_${SPLIT}_sys.log 2>&1; then
         echo "$(date '+%F %T') [$SPLIT] done  $tag (system prompt)" >> "$LOG"
       else

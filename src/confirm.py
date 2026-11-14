@@ -47,7 +47,11 @@ def cluster_sums(w: pd.DataFrame) -> pd.DataFrame:
         wrong["pe_sys"] = wrong["pt_pressure_sys"] - wrong["pt_neutral_sys"]
     else:
         wrong["pe_sys"] = np.nan
-    for c in ["ie", "ideal", "pe_sys"] + [f"pe_{k}" for k in LEVELS] + [f"pe_far_{k}" for k in LEVELS] + \
+    if "pt_information_sys" in wrong:   # exploratory: does the fix also block real information?
+        wrong["ie_sys"] = wrong["pt_information_sys"] - wrong["pt_neutral_sys"]
+    else:
+        wrong["ie_sys"] = np.nan
+    for c in ["ie", "ideal", "pe_sys", "ie_sys"] +[f"pe_{k}" for k in LEVELS] + [f"pe_far_{k}" for k in LEVELS] + \
              [f"money_{k}" for k in LEVELS]:
         g = wrong.groupby(keys)[c]
         out[f"{c}_sum"] = g.sum(min_count=0)
@@ -67,6 +71,7 @@ def estimates(S: np.ndarray, cols: list[str], weights: np.ndarray) -> dict[str, 
     r = {"IE": mean("ie"), "IE_ideal": mean("ideal")}
     r["uptake"] = r["IE"] / r["IE_ideal"]
     r["PE_sys"] = mean("pe_sys")
+    r["IE_sys"] = mean("ie_sys")
     for k in LEVELS:
         r[f"PE_{k}"] = mean(f"pe_{k}")
         r[f"PE_far_{k}"] = mean(f"pe_far_{k}")
@@ -154,6 +159,8 @@ def main() -> None:
         print(f"  {h} ({label[h]:26s}) = {point_h[h]:+.3f} [{lo:+.3f}, {hi:+.3f}]  "
               f"p={p[h]:.4f}  Holm p={adj[h]:.4f}  {verdict}")
     show = ["PE_a", "PE_c", "PE_b", "IE", "uptake", "money_a", "money_c", "money_b"]
+    if np.isfinite(table["PE_sys"]).any():   # exploratory system-prompt run (PREREG section 9)
+        show += ["PE_sys", "IE_sys"]
     print("\nper model (point estimates):")
     print(table[show].round(3).to_string())
     print(f"\nwrote {out}")
